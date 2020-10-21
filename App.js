@@ -12,8 +12,9 @@ import {
 import Quote from './js/components/Quote';
 import NewQuote from './js/components/NewQuote';
 //import AsyncStorage from '@react-native-community/async-storage'; //Key Value Store
-import * as SQLite from 'expo-sqlite';
-const database = SQLite.openDatabase('quotes.db');
+import Firebase from './js/Firebase';
+//TODO import * as SQLite from 'expo-sqlite';
+//TODO const database = SQLite.openDatabase('quotes.db');
 
 //const STORE_KEY = "QUOTES3";
 
@@ -31,13 +32,13 @@ export default class App extends Component {
 
   //promises moderner mit async/await
   _receiveData() {
-    database.transaction(
-      transaction => transaction.executeSql(
-        'SELECT * FROM quotes', [],
-        //(transaction, result) => this.setState({ quotes: result.rows._array })
-        (_, result) => this.setState({ quotes: result.rows._array })
-      )
-    )
+    // database.transaction(
+    //   transaction => transaction.executeSql(
+    //     'SELECT * FROM quotes', [],
+    //     //(transaction, result) => this.setState({ quotes: result.rows._array })
+    //     (_, result) => this.setState({ quotes: result.rows._array })
+    //   )
+    //TODO Firebase
   }
 
   _storeData(quotes) {
@@ -47,21 +48,24 @@ export default class App extends Component {
   }
 
   _saveQuoteToDB(text, author, quotes) {
-    database.transaction(
-      transaction => transaction.executeSql(
-        'INSERT INTO quotes (text, author) VALUES (?,?)',
-        [text, author],
-        //(transaction, result) => console.log('ID des Zitats: ', result.insertId)
-        (_, result) => quotes[quotes.length - 1].id = result.insertId)
-    )
+    Firebase.db.collection('quotes').add({ text, author });
+    // database.transaction(
+    //   transaction => transaction.executeSql(
+    //     'INSERT INTO quotes (text, author) VALUES (?,?)',
+    //     [text, author],
+    //     //(transaction, result) => console.log('ID des Zitats: ', result.insertId)
+    //     (_, result) => quotes[quotes.length - 1].id = result.insertId)
+    // )
+    //TODO Firebase
   }
 
   _deleteQuoteFromDB(id) {
-    database.transaction(
-      transaction => transaction.executeSql(
-        'DELETE FROM quotes WHERE id = ?', [id]
-      )
-    )
+    // database.transaction(
+    //   transaction => transaction.executeSql(
+    //     'DELETE FROM quotes WHERE id = ?', [id]
+    //   )
+    // )
+    //TODO Firebase
   }
 
   _delButton() {
@@ -110,9 +114,11 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    database.transaction(
-      transaction => transaction.executeSql('CREATE TABLE IF NOT EXISTS quotes(id INTEGER PRIMARY KEY NOT NULL, text TEXT, author TEXT)')
-    )
+    // database.transaction(
+    //   transaction => transaction.executeSql('CREATE TABLE IF NOT EXISTS quotes(id INTEGER PRIMARY KEY NOT NULL, text TEXT, author TEXT)')
+    // )
+    // Firebase initialisieren
+    Firebase.init();
     this._receiveData();
   }
   //Lebenszyklus Methode: Mounting initialen Zustand setze
