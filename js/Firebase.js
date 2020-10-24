@@ -11,15 +11,15 @@ const config = {
     messagingSenderId: "558727092530",
     appId: "1:558727092530:web:a46e48d6b949b0987fdf2b"
 };
-
+var isInitialised = false;
 export default class Firebase {
     static db;
 
     static init() {
-        if (firebase.app.length === 0) {
-
+        //if (firebase.app.length === 0) {
+        if (!isInitialised) {
             firebase.initializeApp(config);
-
+            isInitialised = true;
         }
         Firebase.db = firebase.firestore();
     }
