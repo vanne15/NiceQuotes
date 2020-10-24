@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { Component } from 'react';
 import {
   Alert,
+  ActivityIndicator,
   StyleSheet,
   View,
   Button,
@@ -17,7 +18,7 @@ import Firebase from './js/Firebase';
 //const STORE_KEY = "QUOTES3";
 
 export default class App extends Component {
-  state = { index: 0, showNewQuote: false, quotes: [] }; //initialer Zustand
+  state = { index: 0, showNewQuote: false, quotes: [], isLoading: true }; //initialer Zustand
   // //promises herkömmlich
   //_receiveData (){
   // AsyncStorage.getItem('QUOTES').then(value => {
@@ -39,7 +40,7 @@ export default class App extends Component {
         author: quote.data().author
       });
     });
-    this.setState({ quotes })
+    this.setState({ quotes, isLoading: false })
   }
 
   _storeData(quotes) {
@@ -50,7 +51,12 @@ export default class App extends Component {
 
   _saveQuoteToDB = async (text, author, quotes) => {
     docRef = await Firebase.db.collection('quotes').add({ text, author });
-    quotes[quotes.length - 1].id = docRef.id;
+    index = quotes[quotes.length - 1];
+    quotes[index].id = docRef.id;
+    console.log("Save Index:" + index);
+    console.log("Save ID:" + quotes[index].id);
+    this.setState({ index, quotes });
+
   }
 
   _deleteQuoteFromDB(id) {
@@ -71,6 +77,9 @@ export default class App extends Component {
   _delZitat() {
     let { index, quotes } = this.state;
     quotes.splice(index, 1); //aus array löschen
+    console.log("DEL index:" + index);
+    console.log("DEL ID zu index:" + quotes[index].id); //Das funktioniert bei frisch angelegten Datensätzen nicht
+
     this._deleteQuoteFromDB(quotes[index].id);
     this.setState({ index: 0, quotes });
   }
@@ -115,6 +124,13 @@ export default class App extends Component {
   }
   //Lebenszyklus Methode: Mounting initialen Zustand setze
   render() {
+    if (this.state.isLoading) {
+      return (
+        <View style={styles.container}>
+          <ActivityIndicator size="large" color="blue" />
+        </View>
+      );
+    }
     let { index, quotes } = this.state;
     const quote = quotes[index];
 
