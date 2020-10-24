@@ -11,10 +11,8 @@ import {
 } from 'react-native';
 import Quote from './js/components/Quote';
 import NewQuote from './js/components/NewQuote';
-//import AsyncStorage from '@react-native-community/async-storage'; //Key Value Store
 import Firebase from './js/Firebase';
-//TODO import * as SQLite from 'expo-sqlite';
-//TODO const database = SQLite.openDatabase('quotes.db');
+
 
 //const STORE_KEY = "QUOTES3";
 
@@ -31,14 +29,17 @@ export default class App extends Component {
   //}
 
   //promises moderner mit async/await
-  _receiveData() {
-    // database.transaction(
-    //   transaction => transaction.executeSql(
-    //     'SELECT * FROM quotes', [],
-    //     //(transaction, result) => this.setState({ quotes: result.rows._array })
-    //     (_, result) => this.setState({ quotes: result.rows._array })
-    //   )
-    //TODO Firebase
+  _receiveData = async () => {
+    let quotes = [];
+    let query = await Firebase.db.collection('quotes').get();
+    query.forEach(quote => {
+      quotes.push({
+        id: quote.id,
+        text: quote.data().text,
+        author: quote.data().author
+      });
+    });
+    this.setState({ quotes })
   }
 
   _storeData(quotes) {
@@ -47,25 +48,16 @@ export default class App extends Component {
     //AsyncStorage.setItem(STORE_KEY, newLocal);
   }
 
-  _saveQuoteToDB(text, author, quotes) {
-    Firebase.db.collection('quotes').add({ text, author });
-    // database.transaction(
-    //   transaction => transaction.executeSql(
-    //     'INSERT INTO quotes (text, author) VALUES (?,?)',
-    //     [text, author],
-    //     //(transaction, result) => console.log('ID des Zitats: ', result.insertId)
-    //     (_, result) => quotes[quotes.length - 1].id = result.insertId)
-    // )
-    //TODO Firebase
+  _saveQuoteToDB = async (text, author, quotes) => {
+    docRef = await Firebase.db.collection('quotes').add({ text, author });
+    quotes[quotes.length - 1].id = docRef.id;
   }
 
   _deleteQuoteFromDB(id) {
-    // database.transaction(
-    //   transaction => transaction.executeSql(
-    //     'DELETE FROM quotes WHERE id = ?', [id]
-    //   )
-    // )
-    //TODO Firebase
+    Firebase.db
+      .collection('quotes')
+      .doc(id)
+      .delete();
   }
 
   _delButton() {
